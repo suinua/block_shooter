@@ -4,6 +4,7 @@ namespace block_shooter\usecase;
 
 use block_shooter\BossbarTypeList;
 use block_shooter\GameTypeList;
+use block_shooter\scoreboard\SoloGameScoreboard;
 use game_chef\api\FFAGameBuilder;
 use game_chef\api\GameChef;
 use game_chef\models\FFAGame;
@@ -67,6 +68,12 @@ class SoloGameService
         $bossbar->send();
 
         //スコアボード
+        SoloGameScoreboard::send($player, $game);
+
+        //インベントリ
+        $player->getInventory()->setContents([
+            //todo:インベントリのセット
+        ]);
     }
 
     //参加できる試合を探し、参加するように

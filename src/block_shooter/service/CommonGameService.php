@@ -2,9 +2,10 @@
 
 namespace block_shooter\service;
 
+use block_shooter\scoreboard\SoloGameScoreboard;
 use game_chef\pmmp\bossbar\Bossbar;
-use pocketmine\Player;
 use pocketmine\entity\Attribute;
+use pocketmine\Player;
 use pocketmine\Server;
 
 class CommonGameService
@@ -26,5 +27,6 @@ class CommonGameService
         }
 
         //スコアボード削除
+        SoloGameScoreboard::delete($player);
     }
 }
