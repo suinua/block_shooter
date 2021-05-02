@@ -22,6 +22,7 @@ class SoloGameScoreboard extends Scoreboard
     {
         $scores = [];
 
+        $victoryScore = $game->getVictoryScore();
         $isRankedInTop5 = false;
         foreach (GameChef::sortFFATeamsByScore($game->getTeams()) as $index => $team) {
             if ($team->getName() === $player->getName()) {
@@ -29,7 +30,7 @@ class SoloGameScoreboard extends Scoreboard
                 $scores[] = new Score(
                     TextFormat::RED . $team->getName() .
                     TextFormat::RESET . ":" .
-                    strval($team->getScore())
+                    strval($team->getScore()) . "/" . strval($victoryScore)
                 );
             } else {
                 $scores[] = new Score($team->getName() . ":" . strval($team->getScore()));
