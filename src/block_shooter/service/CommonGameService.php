@@ -1,13 +1,13 @@
 <?php
 
-namespace block_shooter\usecase;
+namespace block_shooter\service;
 
 use game_chef\pmmp\bossbar\Bossbar;
 use pocketmine\Player;
 use pocketmine\entity\Attribute;
 use pocketmine\Server;
 
-class CommonGameUsecase
+class CommonGameService
 {
     public static function backToLobby(Player $player): void
     {
