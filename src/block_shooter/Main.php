@@ -20,32 +20,28 @@ use pocketmine\plugin\PluginBase;
 
 class Main extends PluginBase implements Listener
 {
-    public function onEnable()
-    {
+    public function onEnable() {
         SoloGameScoreboard::init();
         ItemFactory::registerItem(new Bow(), true);
         $this->getServer()->getPluginManager()->registerEvents($this, $this);
         $this->getServer()->getPluginManager()->registerEvents(new CommonGameListener(), $this);
-        $this->getServer()->getPluginManager()->registerEvents(new SoloGameListener(), $this);
+        $this->getServer()->getPluginManager()->registerEvents(new SoloGameListener($this->getScheduler()), $this);
     }
 
-    public function onJoin(PlayerJoinEvent $event)
-    {
+    public function onJoin(PlayerJoinEvent $event) {
         $pk = new GameRulesChangedPacket();
         $pk->gameRules["doImmediateRespawn"] = [1, true];
         $event->getPlayer()->sendDataPacket($pk);
     }
 
-    public function onPacketReceived(DataPacketReceiveEvent $event)
-    {
+    public function onPacketReceived(DataPacketReceiveEvent $event) {
         $packet = $event->getPacket();
         if ($packet instanceof LoginPacket) {
             PlayerDeviceDataStore::save($packet);
         }
     }
 
-    public function onChangeSlot(PlayerItemHeldEvent $event): void
-    {
+    public function onChangeSlot(PlayerItemHeldEvent $event): void {
         $player = $event->getPlayer();
         if (!PlayerDeviceDataStore::isTap($player)) return;
 
@@ -62,8 +58,7 @@ class Main extends PluginBase implements Listener
         }
     }
 
-    public function onDropItem(InventoryTransactionEvent $event): void
-    {
+    public function onDropItem(InventoryTransactionEvent $event): void {
         $transaction = $event->getTransaction();
         $player = $transaction->getSource();
         foreach ($transaction->getActions() as $action) {
