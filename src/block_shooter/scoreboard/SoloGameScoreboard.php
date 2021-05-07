@@ -13,13 +13,11 @@ use game_chef\pmmp\scoreboard\ScoreboardSlot;
 
 class SoloGameScoreboard extends Scoreboard
 {
-    public static function init(): void
-    {
+    public static function init(): void {
         self::__setup(ScoreboardSlot::sideBar());
     }
 
-    private static function create(Player $player, FFAGame $game): Scoreboard
-    {
+    private static function create(Player $player, FFAGame $game): Scoreboard {
         $scores = [];
 
         $victoryScore = $game->getVictoryScore();
@@ -33,7 +31,7 @@ class SoloGameScoreboard extends Scoreboard
                     strval($team->getScore()) . "/" . strval($victoryScore)
                 );
             } else {
-                $scores[] = new Score($team->getName() . ":" . strval($team->getScore()));
+                $scores[] = new Score($team->getName() . ":" . strval($team->getScore()) . "/" . strval($victoryScore));
             }
 
             if ($index >= 5) {
@@ -50,14 +48,12 @@ class SoloGameScoreboard extends Scoreboard
         return parent::__create($game->getMap()->getName(), $scores, ScoreSortType::smallToLarge());
     }
 
-    public static function send(Player $player, FFAGame $game)
-    {
+    public static function send(Player $player, FFAGame $game) {
         $scoreboard = self::create($player, $game);
         parent::__send($player, $scoreboard);
     }
 
-    public static function update(Player $player, FFAGame $game)
-    {
+    public static function update(Player $player, FFAGame $game) {
         $scoreboard = self::create($player, $game);
         parent::__update($player, $scoreboard);
     }

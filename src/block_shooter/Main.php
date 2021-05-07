@@ -6,6 +6,7 @@ use block_shooter\item\Bow;
 use block_shooter\listener\CommonGameListener;
 use block_shooter\listener\SoloGameListener;
 use block_shooter\scoreboard\SoloGameScoreboard;
+use block_shooter\service\SoloGameService;
 use pocketmine\block\BlockIds;
 use pocketmine\event\inventory\InventoryTransactionEvent;
 use pocketmine\event\Listener;
@@ -23,6 +24,7 @@ class Main extends PluginBase implements Listener
     public function onEnable() {
         SoloGameScoreboard::init();
         ItemFactory::registerItem(new Bow(), true);
+        SoloGameService::setScheduler($this->getScheduler());
         $this->getServer()->getPluginManager()->registerEvents($this, $this);
         $this->getServer()->getPluginManager()->registerEvents(new CommonGameListener(), $this);
         $this->getServer()->getPluginManager()->registerEvents(new SoloGameListener($this->getScheduler()), $this);
@@ -71,6 +73,7 @@ class Main extends PluginBase implements Listener
                 //todo:アイテム全部捨てられなくしていいんじゃね？
                 $bow = $player->getInventory()->getItem($index);
                 if ($bow instanceof Bow) {
+                    if ($item->getBlock()->getId() === BlockIds::AIR) return;
                     if ($item->getNamedTag()->offsetExists("cannot_shoot")) {
                         $event->setCancelled();
                         return;

@@ -3,6 +3,7 @@
 namespace block_shooter\listener;
 
 use block_shooter\service\SoloGameService;
+use pocketmine\event\player\PlayerRespawnEvent;
 use pocketmine\Server;
 use game_chef\api\GameChef;
 use game_chef\models\Score;
@@ -28,8 +29,7 @@ class SoloGameListener implements Listener
         $this->scheduler = $scheduler;
     }
 
-    public function onJoin(PlayerJoinGameEvent $event)
-    {
+    public function onJoin(PlayerJoinGameEvent $event) {
         $player = $event->getPlayer();
         $gameId = $event->getGameId();
         $gameType = $event->getGameType();
@@ -70,7 +70,7 @@ class SoloGameListener implements Listener
             SoloGameService::sendToGame($player, $game);
 
             //todo:試合の簡易ルールを伝える
-            $player->sendMessage(TextFormat::GREEN .  "試合が開始しました");
+            $player->sendMessage(TextFormat::GREEN . "試合が開始しました");
         }
     }
 
@@ -87,9 +87,9 @@ class SoloGameListener implements Listener
         }
 
         $this->scheduler->scheduleDelayedTask(new ClosureTask(function (int $tick) use ($gameId) : void {
-        //10秒間で退出する可能性があるから、foreachをもう一度書く
-        //上で１プレイヤーずつタスクを書くこともできるが流れがわかりやすいのでこうしている
-        foreach (GameChef::getPlayerDataList($gameId) as $playerData) {
+            //10秒間で退出する可能性があるから、foreachをもう一度書く
+            //上で１プレイヤーずつタスクを書くこともできるが流れがわかりやすいのでこうしている
+            foreach (GameChef::getPlayerDataList($gameId) as $playerData) {
                 $player = Server::getInstance()->getPlayer($playerData->getName());
                 if ($player === null) continue;
 
@@ -119,6 +119,15 @@ class SoloGameListener implements Listener
 
         $event->setDrops([]);
         $event->setXpDropAmount(0);
+    }
+
+    public function onPlayerReSpawn(PlayerRespawnEvent $event) {
+        $player = $event->getPlayer();
+        if (!GameChef::isRelatedWith($player, GameTypeList::Solo())) return;
+
+        $playerData = GameChef::findPlayerData($player->getName());
+        $game = GameChef::findGameById($playerData->getBelongGameId());
+        SoloGameService::setUpPlayerToGame($player, $game);
     }
 
     public function onPlayerKilledPlayer(PlayerKilledPlayerEvent $event) {

@@ -28,7 +28,7 @@ use pocketmine\Server;
 
 class SoloGameService
 {
-    private static $scheduler;
+    private static TaskScheduler $scheduler;
 
     public static function setScheduler(TaskScheduler $scheduler): void {
         self::$scheduler = $scheduler;
@@ -68,8 +68,12 @@ class SoloGameService
 
         $player->teleport($level->getSpawnLocation());
         $player->teleport(Position::fromObject($player->getSpawn(), $level));
-        $player->getAttributeMap()->getAttribute(Attribute::MOVEMENT_SPEED)->setValue(0.25);
-        $player->addEffect(new EffectInstance(Effect::getEffect(Effect::JUMP_BOOST), 600, 4));
+        self::setUpPlayerToGame($player, $game);
+    }
+
+    public static function setUpPlayerToGame(Player $player, FFAGame $game): void {
+        $player->getAttributeMap()->getAttribute(Attribute::MOVEMENT_SPEED)->setValue(0.3);
+        $player->addEffect(new EffectInstance(Effect::getEffect(Effect::JUMP_BOOST), 20 * 600, 4));
 
         //ボスバー
         $bossbar = new Bossbar($player, BossbarTypeList::Solo(), "", 1.0);
@@ -83,6 +87,9 @@ class SoloGameService
             new Bow(),
             Item::get(ItemIds::STONE, 0, 5),
         ]);
+
+        //エリトラ
+        $player->getArmorInventory()->setChestplate(Item::get(ItemIds::ELYTRA));
 
         $player->getInventory()->setItem(9, new Arrow());
     }
@@ -99,6 +106,7 @@ class SoloGameService
         $result = GameChef::joinFFAGame($player, $game->getId());
         if (!$result) {
             $player->sendMessage("試合に参加できませんでした");
+            return;
         }
 
         //n人以上なら、10秒後に試合開始
