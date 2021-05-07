@@ -2,6 +2,7 @@
 
 namespace block_shooter\listener;
 
+use pocketmine\event\player\PlayerJoinEvent;
 use pocketmine\Server;
 use game_chef\api\GameChef;
 use pocketmine\event\Listener;
@@ -14,6 +15,10 @@ use game_chef\pmmp\events\UpdatedGameTimerEvent;
 
 class CommonGameListener implements Listener
 {
+    public function onJoin(PlayerJoinEvent $event) {
+        $player = $event->getPlayer();
+        CommonGameService::backToLobby($player);
+    }
 
     public function onQuitGame(PlayerQuitGameEvent $event)
     {
