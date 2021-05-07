@@ -34,8 +34,9 @@ class Main extends PluginBase implements Listener
 
     public function onPacketReceived(DataPacketReceiveEvent $event)
     {
-        if ($event->getPacket() instanceof LoginPacket) {
-            PlayerDeviceDataStore::save($event->getPacket());
+        $packet = $event->getPacket();
+        if ($packet instanceof LoginPacket) {
+            PlayerDeviceDataStore::save($packet);
         }
     }
 
@@ -83,5 +84,9 @@ class Main extends PluginBase implements Listener
                 }
             }
         }
+    }
+
+    public function tapAirWithBow() {
+        //todo 前に高速移動
     }
 }

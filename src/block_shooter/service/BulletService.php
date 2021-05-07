@@ -3,12 +3,16 @@
 namespace block_shooter\service;
 
 use block_shooter\entity\BulletEntity;
+use pocketmine\block\Stone;
 use pocketmine\entity\Entity;
 use pocketmine\item\Item;
+use pocketmine\item\ItemIds;
 use pocketmine\Player;
 
 class BulletService
 {
+
+
     public static function spawnBullet(Player $player, Item $bulletItem, float $force): void
     {
         $nbt = Entity::createBaseNBT($player->asVector3()->add(0, $player->getEyeHeight()), $player->getDirectionVector()->multiply(2), $player->getYaw(), $player->getPitch());
@@ -27,7 +31,6 @@ class BulletService
     public static function calculateDamage(Player $shooter, Entity $target, Item $bullet): void
     {
         if (!($target instanceof Player)) {
-
             return;
         }
     }

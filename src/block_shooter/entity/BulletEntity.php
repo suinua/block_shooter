@@ -5,6 +5,7 @@ namespace block_shooter\entity;
 use pocketmine\block\Block;
 use pocketmine\entity\Entity;
 use pocketmine\entity\object\ItemEntity;
+use pocketmine\level\particle\DestroyBlockParticle;
 use pocketmine\math\RayTraceResult;
 use pocketmine\math\Vector3;
 use pocketmine\math\VoxelRayTrace;
@@ -33,8 +34,7 @@ class BulletEntity extends ItemEntity
 
     public $canCollide = true;
 
-    protected function initEntity(): void
-    {
+    protected function initEntity(): void {
         parent::initEntity();
 
         $this->setMaxHealth(1);
@@ -44,8 +44,7 @@ class BulletEntity extends ItemEntity
         $blockData = null;
     }
 
-    public function move(float $dx, float $dy, float $dz): void
-    {
+    public function move(float $dx, float $dy, float $dz): void {
         $this->blocksAround = null;
 
         Timings::$entityMoveTimer->startTiming();
@@ -135,13 +134,11 @@ class BulletEntity extends ItemEntity
         Timings::$entityMoveTimer->stopTiming();
     }
 
-    protected function calculateInterceptWithBlock(Block $block, Vector3 $start, Vector3 $end): ?RayTraceResult
-    {
+    protected function calculateInterceptWithBlock(Block $block, Vector3 $start, Vector3 $end): ?RayTraceResult {
         return $block->calculateIntercept($start, $end);
     }
 
-    public function canCollideWith(Entity $entity): bool
-    {
+    public function canCollideWith(Entity $entity): bool {
         if ($entity instanceof Player) {
             $owner = Server::getInstance()->getPlayer($this->owner);
             if ($owner !== null) {
@@ -154,28 +151,25 @@ class BulletEntity extends ItemEntity
         return !$this->justCreated and $entity !== $this;
     }
 
-    public function canBeCollidedWith(): bool
-    {
+    public function canBeCollidedWith(): bool {
         return $this->isAlive();
     }
 
-    public function onCollideWithPlayer(Player $player): void
-    {
+    public function onCollideWithPlayer(Player $player): void {
         return;
     }
 
-    public function onHitEntity(Entity $entity)
-    {
+    public function onHitEntity(Entity $entity) {
         //Todo: ダメージの変更
-        //ブロックの硬さ ツールのレア度
         $entity->kill();
         $this->flagForDespawn();
     }
 
-    public function onHitBlock($block)
-    {
+    public function onHitBlock($block) {
         //Todo: ブロックの種類によって変化させる
         //TNT:爆発
+
+        $this->getLevel()->addParticle(new DestroyBlockParticle($block, $block));
         $this->flagForDespawn();
     }
 }

@@ -9,11 +9,11 @@ use pocketmine\Player;
 
 class Bow extends \pocketmine\item\Bow
 {
-    public function setBulletItem(Item $item) : void {
+    public function setBulletItem(Item $item): void {
         $this->getNamedTag()->setString("item", serialize($item->jsonSerialize()));
     }
 
-    public function getBulletItem() : Item {
+    public function getBulletItem(): Item {
         if ($this->getNamedTag()->offsetExists("item")) {
             $serializedItem = $this->getNamedTag()->getString("item");
 
@@ -23,8 +23,7 @@ class Bow extends \pocketmine\item\Bow
         return Item::get(ItemIds::AIR);
     }
 
-    public function onReleaseUsing(Player $player): bool
-    {
+    public function onReleaseUsing(Player $player): bool {
         if ($this->getBulletItem()->getId() === ItemIds::AIR) {
             $player->sendTip("玉がセットされていません");
             $player->getInventory()->sendContents($player);
