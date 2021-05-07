@@ -3,6 +3,8 @@
 namespace block_shooter;
 
 use block_shooter\item\Bow;
+use block_shooter\listener\CommonGameListener;
+use block_shooter\listener\SoloGameListener;
 use block_shooter\scoreboard\SoloGameScoreboard;
 use pocketmine\block\BlockIds;
 use pocketmine\event\inventory\InventoryTransactionEvent;
@@ -21,8 +23,10 @@ class Main extends PluginBase implements Listener
     public function onEnable()
     {
         SoloGameScoreboard::init();
-        $this->getServer()->getPluginManager()->registerEvents($this, $this);
         ItemFactory::registerItem(new Bow(), true);
+        $this->getServer()->getPluginManager()->registerEvents($this, $this);
+        $this->getServer()->getPluginManager()->registerEvents(new CommonGameListener(), $this);
+        $this->getServer()->getPluginManager()->registerEvents(new SoloGameListener(), $this);
     }
 
     public function onJoin(PlayerJoinEvent $event)
