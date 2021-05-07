@@ -3,7 +3,6 @@
 namespace block_shooter\service;
 
 use block_shooter\scoreboard\SoloGameScoreboard;
-use block_shooter\usecase\SoloGameService;
 use game_chef\pmmp\bossbar\Bossbar;
 use game_chef\pmmp\hotbar_menu\HotbarMenu;
 use game_chef\pmmp\hotbar_menu\HotbarMenuItem;

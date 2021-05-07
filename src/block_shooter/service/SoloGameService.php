@@ -1,6 +1,6 @@
 <?php
 
-namespace block_shooter\usecase;
+namespace block_shooter\service;
 
 use block_shooter\BossbarTypeList;
 use block_shooter\GameTypeList;

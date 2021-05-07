@@ -2,6 +2,7 @@
 
 namespace block_shooter\listener;
 
+use block_shooter\service\SoloGameService;
 use pocketmine\Server;
 use game_chef\api\GameChef;
 use game_chef\models\Score;
@@ -13,7 +14,6 @@ use pocketmine\utils\TextFormat;
 use pocketmine\scheduler\ClosureTask;
 use pocketmine\scheduler\TaskScheduler;
 use game_chef\pmmp\events\AddScoreEvent;
-use block_shooter\usecase\SoloGameService;
 use game_chef\pmmp\events\StartedGameEvent;
 use game_chef\pmmp\events\FinishedGameEvent;
 use pocketmine\event\player\PlayerDeathEvent;
