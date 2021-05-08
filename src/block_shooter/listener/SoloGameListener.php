@@ -2,6 +2,7 @@
 
 namespace block_shooter\listener;
 
+use block_shooter\scoreboard\SoloGameScoreboard;
 use block_shooter\service\SoloGameService;
 use pocketmine\event\player\PlayerRespawnEvent;
 use pocketmine\Server;
@@ -106,7 +107,8 @@ class SoloGameListener implements Listener
         $game = GameChef::findFFAGameById($gameId);
         foreach (GameChef::getPlayerDataList($gameId) as $playerData) {
             $player = Server::getInstance()->getPlayer($playerData->getName());
-            //todo:スコアボード
+            if ($player === null) continue;
+            SoloGameScoreboard::update($player, $game);
         }
     }
 
@@ -127,7 +129,7 @@ class SoloGameListener implements Listener
 
         $playerData = GameChef::findPlayerData($player->getName());
         $game = GameChef::findGameById($playerData->getBelongGameId());
-        SoloGameService::setUpPlayerToGame($player, $game);
+        SoloGameService::setUpPlayerStatus($player, $game);
     }
 
     public function onPlayerKilledPlayer(PlayerKilledPlayerEvent $event) {

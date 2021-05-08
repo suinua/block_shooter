@@ -10,6 +10,7 @@ use game_chef\api\FFAGameBuilder;
 use game_chef\api\GameChef;
 use game_chef\models\FFAGame;
 use game_chef\models\FFAGameMap;
+use game_chef\models\GameId;
 use game_chef\models\Score;
 use game_chef\pmmp\bossbar\Bossbar;
 use pocketmine\entity\Attribute;
@@ -23,12 +24,19 @@ use pocketmine\level\Position;
 use pocketmine\math\Vector3;
 use pocketmine\Player;
 use pocketmine\scheduler\ClosureTask;
+use pocketmine\scheduler\TaskHandler;
 use pocketmine\scheduler\TaskScheduler;
 use pocketmine\Server;
 
 class SoloGameService
 {
     private static TaskScheduler $scheduler;
+
+    //game id => handler
+    /**
+     * @var TaskHandler[]
+     */
+    private static array $handlerList = [];
 
     public static function setScheduler(TaskScheduler $scheduler): void {
         self::$scheduler = $scheduler;
@@ -68,12 +76,6 @@ class SoloGameService
 
         $player->teleport($level->getSpawnLocation());
         $player->teleport(Position::fromObject($player->getSpawn(), $level));
-        self::setUpPlayerToGame($player, $game);
-    }
-
-    public static function setUpPlayerToGame(Player $player, FFAGame $game): void {
-        $player->getAttributeMap()->getAttribute(Attribute::MOVEMENT_SPEED)->setValue(0.3);
-        $player->addEffect(new EffectInstance(Effect::getEffect(Effect::JUMP_BOOST), 20 * 600, 4));
 
         //ボスバー
         $bossbar = new Bossbar($player, BossbarTypeList::Solo(), "", 1.0);
@@ -82,16 +84,23 @@ class SoloGameService
         //スコアボード
         SoloGameScoreboard::send($player, $game);
 
+        self::setUpPlayerStatus($player, $game);
+    }
+
+    public static function setUpPlayerStatus(Player $player, FFAGame $game): void {
+        //エフェクト
+        $player->getAttributeMap()->getAttribute(Attribute::MOVEMENT_SPEED)->setValue(0.4);
+        $player->addEffect(new EffectInstance(Effect::getEffect(Effect::JUMP_BOOST), 20 * 600, 5));
+
         //インベントリ
         $player->getInventory()->setContents([
             new Bow(),
             Item::get(ItemIds::STONE, 0, 5),
         ]);
+        $player->getInventory()->setItem(9, new Arrow());
 
         //エリトラ
         $player->getArmorInventory()->setChestplate(Item::get(ItemIds::ELYTRA));
-
-        $player->getInventory()->setItem(9, new Arrow());
     }
 
     //参加できる試合を探し、参加するように
@@ -110,14 +119,24 @@ class SoloGameService
         }
 
         //n人以上なら、10秒後に試合開始
+        //todo:10秒の間に１人以下になったらキャンセル
         if (count(GameChef::getPlayerDataList($game->getId())) >= 2) {
             self::$scheduler->scheduleDelayedTask(new ClosureTask(function (int $tick) use ($game): void {
                 GameChef::startGame($game->getId());
+                $map = $game->getMap();
+                self::$handlerList[strval($game->getId())] = self::$scheduler->scheduleRepeatingTask(new ClosureTask(function (int $tick) use ($map): void {
+                    self::spawnBulletItems($map);
+                }), 20 * 3);
             }), 20 * 10);
         }
     }
 
-    public static function spawnBulletItems(FFAGameMap $map): void {
+    public static function stopSpawnBullets(GameId $gameId): void {
+        self::$handlerList[strval($gameId)]->cancel();
+        unset(self::$handlerList[strval($gameId)]);
+    }
+
+    private static function spawnBulletItems(FFAGameMap $map): void {
         $spawnPoints = $map->getCustomArrayVectorData("bullets");
         $count = intval(count($spawnPoints) / 1.5);
         $indexList = array_rand($spawnPoints, $count);
@@ -127,7 +146,7 @@ class SoloGameService
         }
     }
 
-    public static function spawnBulletItem(Level $level, Vector3 $vector3): void {
+    private static function spawnBulletItem(Level $level, Vector3 $vector3): void {
         //todo:玉の種類を増やす
         $level->dropItem($vector3, Item::get(ItemIds::STONE));
     }

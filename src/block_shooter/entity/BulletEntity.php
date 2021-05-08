@@ -2,6 +2,7 @@
 
 namespace block_shooter\entity;
 
+use pocketmine\block\Air;
 use pocketmine\block\Block;
 use pocketmine\entity\Entity;
 use pocketmine\entity\object\ItemEntity;
@@ -170,6 +171,7 @@ class BulletEntity extends ItemEntity
         //TNT:爆発
 
         $this->getLevel()->addParticle(new DestroyBlockParticle($block, $block));
+        $this->getLevel()->setBlock($block, new Air());
         $this->flagForDespawn();
     }
 }
