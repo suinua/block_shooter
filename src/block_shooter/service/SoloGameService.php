@@ -84,10 +84,10 @@ class SoloGameService
         //スコアボード
         SoloGameScoreboard::send($player, $game);
 
-        self::setUpPlayerStatus($player, $game);
+        self::initPlayerStatus($player);
     }
 
-    public static function setUpPlayerStatus(Player $player, FFAGame $game): void {
+    public static function initPlayerStatus(Player $player): void {
         //エフェクト
         $player->getAttributeMap()->getAttribute(Attribute::MOVEMENT_SPEED)->setValue(0.4);
         $player->addEffect(new EffectInstance(Effect::getEffect(Effect::JUMP_BOOST), 20 * 600, 5));

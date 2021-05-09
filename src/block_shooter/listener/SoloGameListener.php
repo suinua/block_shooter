@@ -129,7 +129,7 @@ class SoloGameListener implements Listener
 
         $playerData = GameChef::findPlayerData($player->getName());
         $game = GameChef::findGameById($playerData->getBelongGameId());
-        SoloGameService::setUpPlayerStatus($player, $game);
+        SoloGameService::initPlayerStatus($player);
     }
 
     public function onPlayerKilledPlayer(PlayerKilledPlayerEvent $event) {
