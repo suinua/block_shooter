@@ -4,7 +4,6 @@ namespace block_shooter\service;
 
 use block_shooter\BossbarTypeList;
 use block_shooter\GameTypeList;
-use block_shooter\item\Bow;
 use block_shooter\scoreboard\SoloGameScoreboard;
 use game_chef\api\FFAGameBuilder;
 use game_chef\api\GameChef;
@@ -13,10 +12,6 @@ use game_chef\models\FFAGameMap;
 use game_chef\models\GameId;
 use game_chef\models\Score;
 use game_chef\pmmp\bossbar\Bossbar;
-use pocketmine\entity\Attribute;
-use pocketmine\entity\Effect;
-use pocketmine\entity\EffectInstance;
-use pocketmine\item\Arrow;
 use pocketmine\item\Item;
 use pocketmine\item\ItemIds;
 use pocketmine\level\Level;
@@ -84,23 +79,7 @@ class SoloGameService
         //スコアボード
         SoloGameScoreboard::send($player, $game);
 
-        self::initPlayerStatus($player);
-    }
-
-    public static function initPlayerStatus(Player $player): void {
-        //エフェクト
-        $player->getAttributeMap()->getAttribute(Attribute::MOVEMENT_SPEED)->setValue(0.4);
-        $player->addEffect(new EffectInstance(Effect::getEffect(Effect::JUMP_BOOST), 20 * 600, 5));
-
-        //インベントリ
-        $player->getInventory()->setContents([
-            new Bow(),
-            Item::get(ItemIds::STONE, 0, 5),
-        ]);
-        $player->getInventory()->setItem(9, new Arrow());
-
-        //エリトラ
-        $player->getArmorInventory()->setChestplate(Item::get(ItemIds::ELYTRA));
+        CommonGameService::initPlayerStatus($player);
     }
 
     //参加できる試合を探し、参加するように
@@ -119,35 +98,11 @@ class SoloGameService
         }
 
         //n人以上なら、10秒後に試合開始
-        //todo:10秒の間に１人以下になったらキャンセル
         if (count(GameChef::getPlayerDataList($game->getId())) >= 2) {
             self::$scheduler->scheduleDelayedTask(new ClosureTask(function (int $tick) use ($game): void {
+                //todo:10秒の間に１人以下になったらキャンセル
                 GameChef::startGame($game->getId());
-                $map = $game->getMap();
-                self::$handlerList[strval($game->getId())] = self::$scheduler->scheduleRepeatingTask(new ClosureTask(function (int $tick) use ($map): void {
-                    self::spawnBulletItems($map);
-                }), 20 * 3);
             }), 20 * 10);
         }
-    }
-
-    public static function stopSpawnBullets(GameId $gameId): void {
-        self::$handlerList[strval($gameId)]->cancel();
-        unset(self::$handlerList[strval($gameId)]);
-    }
-
-    private static function spawnBulletItems(FFAGameMap $map): void {
-        $spawnPoints = $map->getCustomArrayVectorData("bullets");
-        $count = intval(count($spawnPoints) / 1.5);
-        $indexList = array_rand($spawnPoints, $count);
-        $level = Server::getInstance()->getLevelByName($map->getLevelName());
-        foreach ($indexList as $index) {
-            self::spawnBulletItem($level, $spawnPoints[$index]);
-        }
-    }
-
-    private static function spawnBulletItem(Level $level, Vector3 $vector3): void {
-        //todo:玉の種類を増やす
-        $level->dropItem($vector3, Item::get(ItemIds::STONE));
     }
 }

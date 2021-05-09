@@ -4,7 +4,9 @@ namespace block_shooter;
 
 use block_shooter\item\Bow;
 use block_shooter\listener\CommonGameListener;
+use block_shooter\listener\CorePVPGameListener;
 use block_shooter\listener\SoloGameListener;
+use block_shooter\scoreboard\CorePVPScoreboard;
 use block_shooter\scoreboard\SoloGameScoreboard;
 use block_shooter\service\SoloGameService;
 use pocketmine\block\BlockIds;
@@ -23,11 +25,13 @@ class Main extends PluginBase implements Listener
 {
     public function onEnable() {
         SoloGameScoreboard::init();
+        CorePVPScoreboard::init();
         ItemFactory::registerItem(new Bow(), true);
         SoloGameService::setScheduler($this->getScheduler());
         $this->getServer()->getPluginManager()->registerEvents($this, $this);
         $this->getServer()->getPluginManager()->registerEvents(new CommonGameListener(), $this);
         $this->getServer()->getPluginManager()->registerEvents(new SoloGameListener($this->getScheduler()), $this);
+        $this->getServer()->getPluginManager()->registerEvents(new CorePVPGameListener($this->getScheduler()), $this);
     }
 
     public function onJoin(PlayerJoinEvent $event) {

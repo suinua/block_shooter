@@ -84,6 +84,7 @@ class SoloGameListener implements Listener
             $player = Server::getInstance()->getPlayer($playerData->getName());
             if ($player === null) continue;
 
+            $player->sendMessage("試合終了");
             //勝利判定 + メッセージ
         }
 
@@ -96,6 +97,8 @@ class SoloGameListener implements Listener
 
                 CommonGameService::backToLobby($player);
             }
+
+            GameChef::discardGame($gameId);
         }), 20 * 10);
     }
 
@@ -129,7 +132,7 @@ class SoloGameListener implements Listener
 
         $playerData = GameChef::findPlayerData($player->getName());
         $game = GameChef::findGameById($playerData->getBelongGameId());
-        SoloGameService::initPlayerStatus($player);
+        CommonGameService::initPlayerStatus($player);
     }
 
     public function onPlayerKilledPlayer(PlayerKilledPlayerEvent $event) {

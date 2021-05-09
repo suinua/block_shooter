@@ -17,4 +17,9 @@ class GameTypeList
     {
         return new GameType("SoloBlockShooter");
     }
+
+    public static function CorePVP(): GameType
+    {
+        return new GameType("CorePVPBlockShooter");
+    }
 }

@@ -17,4 +17,9 @@ class BossbarTypeList
     {
         return new BossbarType("SoloBlockShooter");
     }
+
+    public static function CorePVP(): BossbarType
+    {
+        return new BossbarType("CorePVPBlockShooter");
+    }
 }
