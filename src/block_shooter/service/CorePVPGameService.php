@@ -14,6 +14,8 @@ use game_chef\models\Team;
 use game_chef\models\TeamGame;
 use game_chef\pmmp\bossbar\Bossbar;
 use mine_deep_rock\pmmp\service\SoundService;
+use pocketmine\block\Bedrock;
+use pocketmine\level\particle\ExplodeParticle;
 use pocketmine\level\Position;
 use pocketmine\math\Vector3;
 use pocketmine\Player;
@@ -78,6 +80,10 @@ class CorePVPGameService
         CorePVPScoreboard::send($player, $game);
 
         CommonGameService::initPlayerStatus($player);
+
+        $playerData = GameChef::findPlayerData($player->getName());
+        $team = $game->getTeamById($playerData->getBelongTeamId());
+        $player->sendMessage("あなたは" . $team->getTeamColorFormat() . $team->getName() . TextFormat::RESET . "です");
     }
 
     //参加できる試合を探し、参加するように
@@ -110,18 +116,34 @@ class CorePVPGameService
         foreach ($playerDataList as $playerData) {
             $player = Server::getInstance()->getPlayer($playerData->getName());
 
-            //音:半径20m以下なら、以外でコアのチームなら
             if ($player->distance($nexusPosition) <= 20) {
+                //音:半径20m以下
                 SoundService::play($player, $nexusPosition, "random.anvil_land", 50, 3);
+
             } else if ($playerData->getBelongTeamId()->equals($targetTeam->getId())) {
+                //20m以上で破壊されてるコアのチームなら
                 SoundService::play($player, $player->getPosition(), "note.pling", 50, 2);
             }
 
             //TIP
             if ($playerData->getBelongTeamId()->equals($targetTeam->getId())) {
-                $player->sendTip("コアが攻撃されています");
+                $player->sendTip($attacker->getName() . "にコアを攻撃されています\nHP:" . Nexus::MAX_HEALTH - $targetTeam->getScore());
             } else {
-                $player->sendTip($attackerTeam->getTeamColorFormat() . $attacker->getName() . TextFormat::RESET . "が" . $targetTeam->getTeamColorFormat() . $targetTeam->getName() . TextFormat::RESET . "を攻撃中");
+                $player->sendTip(
+                    $attackerTeam->getTeamColorFormat() . $attacker->getName() . TextFormat::RESET . "が" . $targetTeam->getTeamColorFormat() . $targetTeam->getName() . TextFormat::RESET . "を攻撃中"
+                );
+            }
+        }
+
+        $isFinish = $targetTeam->getScore()->getValue() === (Nexus::MAX_HEALTH - 1);
+        if ($isFinish) {
+            $level = $attacker->getLevel();
+            $level->setBlock($nexusPosition, new Bedrock());
+
+            $i = 0;
+            while ($i > 4) {
+                $level->addParticle(new ExplodeParticle($nexusPosition));
+                $i++;
             }
         }
 

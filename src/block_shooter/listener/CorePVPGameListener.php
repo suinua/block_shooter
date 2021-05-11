@@ -27,8 +27,6 @@ use pocketmine\scheduler\TaskScheduler;
 use pocketmine\Server;
 use pocketmine\utils\TextFormat;
 
-//2チームのみ対応している
-//そのうち3チーム以上に対応しようと思う
 class CorePVPGameListener implements Listener
 {
     private TaskScheduler $scheduler;
@@ -57,12 +55,17 @@ class CorePVPGameListener implements Listener
         if (!$gameType->equals(GameTypeList::CorePVP())) return;
 
         $winTeam = null;
+        $availableTeamCount = 0;
         $game = GameChef::findGameById($gameId);
         foreach ($game->getTeams() as $team) {
             if ($team->getScore()->getValue() < Nexus::MAX_HEALTH) {
+                $availableTeamCount++;
                 $winTeam = $team;
             }
         }
+
+        //2チーム以上残っていたら
+        if ($availableTeamCount >= 2) return;
 
         foreach (GameChef::getPlayerDataList($gameId) as $playerData) {
             $player = Server::getInstance()->getPlayer($playerData->getName());
