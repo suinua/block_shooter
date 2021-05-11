@@ -2,11 +2,11 @@
 
 namespace block_shooter\entity;
 
-use pocketmine\block\Air;
+use block_shooter\block\Nexus;
+use block_shooter\service\BulletService;
 use pocketmine\block\Block;
 use pocketmine\entity\Entity;
 use pocketmine\entity\object\ItemEntity;
-use pocketmine\level\particle\DestroyBlockParticle;
 use pocketmine\math\RayTraceResult;
 use pocketmine\math\Vector3;
 use pocketmine\math\VoxelRayTrace;
@@ -161,17 +161,17 @@ class BulletEntity extends ItemEntity
     }
 
     public function onHitEntity(Entity $entity) {
-        //Todo: ダメージの変更
-        $entity->kill();
+        BulletService::hit($this);
         $this->flagForDespawn();
     }
 
-    public function onHitBlock($block) {
-        //Todo: ブロックの種類によって変化させる
-        //TNT:爆発
-
-        $this->getLevel()->addParticle(new DestroyBlockParticle($block, $block));
-        $this->getLevel()->setBlock($block, new Air());
+    public function onHitBlock(Block $block) {
+        $owner = $this->getOwningEntity();
+        if ($owner instanceof Player) {
+            $item = $owner->getInventory()->getItemInHand();
+            $block->getLevel()->useBreakOn($block, $item, $owner, true);
+        }
+        BulletService::hit($this);
         $this->flagForDespawn();
     }
 }

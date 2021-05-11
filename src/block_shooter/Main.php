@@ -2,6 +2,7 @@
 
 namespace block_shooter;
 
+use block_shooter\block\Putty;
 use block_shooter\item\Bow;
 use block_shooter\listener\CommonGameListener;
 use block_shooter\listener\CorePVPGameListener;
@@ -56,6 +57,7 @@ class Main extends PluginBase implements Listener
 
         if ($nextItem instanceof Bow) {
             if ($currentItem->getBlock()->getId() === BlockIds::AIR) return;
+            if ($currentItem->getId() === Putty::ITEM_ID) return;
             if ($currentItem->getNamedTag()->offsetExists("cannot_shoot")) return;
 
             $nextItem->setBulletItem($currentItem);
@@ -78,6 +80,7 @@ class Main extends PluginBase implements Listener
                 $bow = $player->getInventory()->getItem($index);
                 if ($bow instanceof Bow) {
                     if ($item->getBlock()->getId() === BlockIds::AIR) return;
+                    if ($item->getId() === Putty::ITEM_ID) return;
                     if ($item->getNamedTag()->offsetExists("cannot_shoot")) {
                         $event->setCancelled();
                         return;

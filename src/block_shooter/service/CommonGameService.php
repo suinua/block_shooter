@@ -2,12 +2,14 @@
 
 namespace block_shooter\service;
 
+use block_shooter\block\Putty;
 use block_shooter\form\JoinGameForm;
 use block_shooter\item\Bow;
 use block_shooter\scoreboard\SoloGameScoreboard;
 use game_chef\pmmp\bossbar\Bossbar;
 use game_chef\pmmp\hotbar_menu\HotbarMenu;
 use game_chef\pmmp\hotbar_menu\HotbarMenuItem;
+use pocketmine\block\Bricks;
 use pocketmine\entity\Attribute;
 use pocketmine\entity\Effect;
 use pocketmine\entity\EffectInstance;
@@ -53,17 +55,11 @@ class CommonGameService
         $player->addEffect(new EffectInstance(Effect::getEffect(Effect::JUMP_BOOST), 20 * 600, 5));
 
 
-        $tools = [
-            ItemIds::STONE_PICKAXE,
-            ItemIds::STONE_AXE,
-            ItemIds::STONE_SHOVEL,
-        ];
-
         //インベントリ
         $player->getInventory()->setContents([
             new Bow(),
             Item::get(ItemIds::STONE, 0, 5),
-            $tools[rand(0, 2)]
+            Item::get(Putty::ITEM_ID, 0, 20)
         ]);
         $player->getInventory()->setItem(9, new Arrow());
 
