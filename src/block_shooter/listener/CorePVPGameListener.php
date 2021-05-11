@@ -64,7 +64,7 @@ class CorePVPGameListener implements Listener
             }
         }
 
-        //2チーム以上残っていたら
+        //2チーム以上残っていたら試合は終了しない
         if ($availableTeamCount >= 2) return;
 
         foreach (GameChef::getPlayerDataList($gameId) as $playerData) {
@@ -168,8 +168,16 @@ class CorePVPGameListener implements Listener
         $player = $event->getPlayer();
         if (!GameChef::isRelatedWith($player, GameTypeList::CorePVP())) return;
 
-        //スポーン地点を再設定
-        GameChef::setTeamGamePlayerSpawnPoint($event->getPlayer());
+        $playerData = GameChef::findPlayerData($player->getName());
+        $game = GameChef::findGameById($playerData->getBelongGameId());
+        $team = $game->getTeamById($playerData->getBelongTeamId());
+        if ($team->getScore()->getValue() !== Nexus::MAX_HEALTH) {
+            GameChef::quitGame($player);
+        } else {
+            //スポーン地点を再設定
+            GameChef::setTeamGamePlayerSpawnPoint($event->getPlayer());
+        }
+
     }
 
     public function onBreakNexus(BlockBreakEvent $event) {

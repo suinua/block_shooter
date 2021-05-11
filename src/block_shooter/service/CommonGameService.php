@@ -2,6 +2,7 @@
 
 namespace block_shooter\service;
 
+use block_shooter\form\JoinGameForm;
 use block_shooter\item\Bow;
 use block_shooter\scoreboard\SoloGameScoreboard;
 use game_chef\pmmp\bossbar\Bossbar;
@@ -20,7 +21,7 @@ use pocketmine\utils\TextFormat;
 class CommonGameService
 {
     public static function backToLobby(Player $player): void {
-        $level = Server::getInstance()->getLevelByName("lobby");
+        $level = Server::getInstance()->getDefaultLevel();
         $player->teleport($level->getSpawnLocation());
         $player->getAttributeMap()->getAttribute(Attribute::MOVEMENT_SPEED)->setValue(0.1);
         $player->removeAllEffects();
@@ -31,8 +32,7 @@ class CommonGameService
                 0,
                 TextFormat::GREEN . "試合に参加",
                 function (Player $player) {
-                    //todo soloとteamで分ける
-                    SoloGameService::randomJoin($player);
+                    $player->sendForm(new JoinGameForm());
                 }
             )
         ]);

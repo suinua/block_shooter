@@ -93,6 +93,7 @@ class CorePVPGameService
             self::createGame();
         }
 
+        //todo gamechefに前回のゲームIDとチームIDを記録し、それを使い再度参加する場合はそのチームにするように(負けたチームの場合その試合には参加できない)
         $games = GameChef::getGamesByType(GameTypeList::CorePVP());
         $game = $games[0];
         $result = GameChef::joinTeamGame($player, $game->getId());
