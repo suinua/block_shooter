@@ -9,7 +9,6 @@ use block_shooter\scoreboard\SoloGameScoreboard;
 use game_chef\pmmp\bossbar\Bossbar;
 use game_chef\pmmp\hotbar_menu\HotbarMenu;
 use game_chef\pmmp\hotbar_menu\HotbarMenuItem;
-use pocketmine\block\Bricks;
 use pocketmine\entity\Attribute;
 use pocketmine\entity\Effect;
 use pocketmine\entity\EffectInstance;

@@ -19,7 +19,13 @@ use pocketmine\Player;
 
 class BulletService
 {
-
+    const BULLET_IDS = [
+        ItemIds::TNT,
+        ItemIds::SNOW_BLOCK,
+        ItemIds::SAND,
+        ItemIds::REDSTONE_BLOCK,
+        ItemIds::ICE,
+    ];
 
     public static function spawnBullet(Player $player, Item $bulletItem, float $force): void {
         $nbt = Entity::createBaseNBT($player->asVector3()->add(0, $player->getEyeHeight()), $player->getDirectionVector()->multiply(2), $player->getYaw(), $player->getPitch());
@@ -75,7 +81,7 @@ class BulletService
 
     private static function hitSand(Level $level, Vector3 $pos) {
         $level->addSound(new GenericSound($pos, LevelSoundEventPacket::SOUND_AMBIENT_SOULSAND_VALLEY_ADDITIONS));
-        foreach (self::getAroundPlayer($level, $pos, 2.5) as $player) {
+        foreach (self::getAroundPlayer($level, $pos, 4) as $player) {
             $player->addEffect(new EffectInstance(Effect::getEffect(Effect::BLINDNESS), 20 * 5, 1));
         }
     }

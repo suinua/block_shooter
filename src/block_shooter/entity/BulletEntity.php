@@ -3,6 +3,7 @@
 namespace block_shooter\entity;
 
 use block_shooter\block\Nexus;
+use block_shooter\block\UnbreakableBlock;
 use block_shooter\service\BulletService;
 use pocketmine\block\Block;
 use pocketmine\entity\Entity;
@@ -168,8 +169,10 @@ class BulletEntity extends ItemEntity
     public function onHitBlock(Block $block) {
         $owner = $this->getOwningEntity();
         if ($owner instanceof Player) {
-            $item = $owner->getInventory()->getItemInHand();
-            $block->getLevel()->useBreakOn($block, $item, $owner, true);
+            if ($block->getId() !== UnbreakableBlock::ID) {
+                $item = $owner->getInventory()->getItemInHand();
+                $block->getLevel()->useBreakOn($block, $item, $owner, true);
+            }
         }
         BulletService::hit($this);
         $this->flagForDespawn();
