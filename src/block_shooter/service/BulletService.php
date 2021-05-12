@@ -19,14 +19,6 @@ use pocketmine\Player;
 
 class BulletService
 {
-    const BULLET_IDS = [
-        ItemIds::TNT,
-        ItemIds::SNOW_BLOCK,
-        ItemIds::SAND,
-        ItemIds::REDSTONE_BLOCK,
-        ItemIds::ICE,
-    ];
-
     public static function spawnBullet(Player $player, Item $bulletItem, float $force): void {
         $nbt = Entity::createBaseNBT($player->asVector3()->add(0, $player->getEyeHeight()), $player->getDirectionVector()->multiply(2), $player->getYaw(), $player->getPitch());
 
