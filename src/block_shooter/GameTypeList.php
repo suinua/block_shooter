@@ -10,6 +10,7 @@ class GameTypeList
     {
         return [
             self::Solo(),
+            self::CorePVP()
         ];
     }
 
