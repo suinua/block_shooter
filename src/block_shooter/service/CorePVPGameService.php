@@ -14,12 +14,13 @@ use game_chef\models\Team;
 use game_chef\models\TeamGame;
 use game_chef\pmmp\bossbar\Bossbar;
 use game_chef\pmmp\private_name_tag\PrivateNameTag;
-use mine_deep_rock\pmmp\service\SoundService;
 use pocketmine\block\Bedrock;
+use pocketmine\block\Block;
 use pocketmine\level\particle\ExplodeParticle;
 use pocketmine\level\Position;
 use pocketmine\math\Vector3;
 use pocketmine\Player;
+use pocketmine\scheduler\ClosureTask;
 use pocketmine\scheduler\TaskScheduler;
 use pocketmine\Server;
 use pocketmine\utils\TextFormat;
@@ -38,7 +39,7 @@ class CorePVPGameService
             $builder->setNumberOfTeams(2);
             $builder->setGameType(GameTypeList::CorePVP());
             $builder->setTimeLimit(600);
-            $builder->setVictoryScore(new Score(Nexus::MAX_HEALTH + 1));
+            $builder->setVictoryScore(new Score(Nexus::MAX_HEALTH));
             $builder->setCanJumpIn(true);
             $builder->selectMapByName($mapName);
 
@@ -125,9 +126,9 @@ class CorePVPGameService
         foreach ($playerDataList as $playerData) {
             $player = Server::getInstance()->getPlayer($playerData->getName());
 
-            if ($player->distance($nexusPosition) <= 20) {
+            if ($player->distance($nexusPosition) <= 10) {
                 //音:半径20m以下
-                SoundService::play($player, $nexusPosition, "random.anvil_land", 50, 3);
+                SoundService::play($player, $nexusPosition, "random.anvil_land", 50, 1);
 
             } else if ($playerData->getBelongTeamId()->equals($targetTeam->getId())) {
                 //20m以上で破壊されてるコアのチームなら
@@ -136,7 +137,7 @@ class CorePVPGameService
 
             //TIP
             if ($playerData->getBelongTeamId()->equals($targetTeam->getId())) {
-                $player->sendTip($attacker->getName() . "にコアを攻撃されています\nHP:" . (Nexus::MAX_HEALTH - $targetTeam->getScore()->getValue()));
+                $player->sendTip($attackerTeam->getTeamColorFormat() . $attacker->getName() . TextFormat::RESET . "にコアを攻撃されています\nHP:" . (Nexus::MAX_HEALTH - $targetTeam->getScore()->getValue()));
             } else {
                 $player->sendTip(
                     $attackerTeam->getTeamColorFormat() . $attacker->getName() . TextFormat::RESET . "が" . $targetTeam->getTeamColorFormat() . $targetTeam->getName() . TextFormat::RESET . "を攻撃中"
@@ -154,6 +155,11 @@ class CorePVPGameService
                 $level->addParticle(new ExplodeParticle($nexusPosition));
                 $i++;
             }
+        } else {
+            $level = $attacker->getLevel();
+            self::$scheduler->scheduleDelayedTask(new ClosureTask(function (int $tick) use ($level, $nexusPosition) : void {
+                $level->setBlock($nexusPosition, Block::get(Nexus::ID));
+            }), 20 * 0.5);
         }
 
         GameChef::addTeamGameScore($teamGame->getId(), $targetTeam->getId(), new Score(1));

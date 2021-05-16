@@ -9,6 +9,7 @@ use block_shooter\listener\CorePVPGameListener;
 use block_shooter\listener\SoloGameListener;
 use block_shooter\scoreboard\CorePVPScoreboard;
 use block_shooter\scoreboard\SoloGameScoreboard;
+use block_shooter\service\CorePVPGameService;
 use block_shooter\service\SoloGameService;
 use pocketmine\block\BlockIds;
 use pocketmine\event\inventory\InventoryTransactionEvent;
@@ -29,6 +30,7 @@ class Main extends PluginBase implements Listener
         CorePVPScoreboard::init();
         ItemFactory::registerItem(new Bow(), true);
         SoloGameService::setScheduler($this->getScheduler());
+        CorePVPGameService::setScheduler($this->getScheduler());
         $this->getServer()->getPluginManager()->registerEvents($this, $this);
         $this->getServer()->getPluginManager()->registerEvents(new CommonGameListener(), $this);
         $this->getServer()->getPluginManager()->registerEvents(new SoloGameListener($this->getScheduler()), $this);

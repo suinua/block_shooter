@@ -75,18 +75,8 @@ class CorePVPGameListener implements Listener
             $player = Server::getInstance()->getPlayer($playerData->getName());
             if ($player === null) continue;
 
-            if ($playerData->getBelongTeamId()->equals($winTeam->getId())) {
-                Entity::createEntity(
-                    "Firework",
-                    $player->getLevel(),
-                    Entity::createBaseNBT($player->getPosition(), null, 0, 0),
-                )->spawnToAll();
-
-            }
-
             $player->sendMessage($winTeam->getTeamColorFormat() . $winTeam->getName() . TextFormat::RESET . "の勝利！！！");
             $player->sendMessage("10秒後にロビーに戻ります");
-            CommonGameService::backToLobby($player);
         }
 
         $this->scheduler->scheduleDelayedTask(new ClosureTask(function (int $tick) use ($gameId) : void {

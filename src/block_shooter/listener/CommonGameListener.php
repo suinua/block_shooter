@@ -31,7 +31,7 @@ class CommonGameListener implements Listener
     public function onUpdatedGameTimer(UpdatedGameTimerEvent $event) {
         $gameId = $event->getGameId();
         $gameType = $event->getGameType();
-        if (GameTypeList::isExist($gameType)) return;
+        if (!GameTypeList::isExist($gameType)) return;
 
         //ボスバーの更新
         foreach (GameChef::getPlayerDataList($gameId) as $playerData) {

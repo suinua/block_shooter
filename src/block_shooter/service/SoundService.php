@@ -1,7 +1,7 @@
 <?php
 
 
-namespace mine_deep_rock\pmmp\service;
+namespace block_shooter\service;
 
 
 use pocketmine\math\Vector3;
