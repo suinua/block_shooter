@@ -20,27 +20,25 @@ class CommonGameListener implements Listener
         CommonGameService::backToLobby($player);
     }
 
-    public function onQuitGame(PlayerQuitGameEvent $event)
-    {
+    public function onQuitGame(PlayerQuitGameEvent $event) {
         $player = $event->getPlayer();
         $gameType = $event->getGameType();
-        if (!in_array($gameType, GameTypeList::getAll())) return;
+        if (GameTypeList::isExist($gameType)) return;
 
         CommonGameService::backToLobby($player);
     }
 
-    public function onUpdatedGameTimer(UpdatedGameTimerEvent $event)
-    {
+    public function onUpdatedGameTimer(UpdatedGameTimerEvent $event) {
         $gameId = $event->getGameId();
         $gameType = $event->getGameType();
-        if (!in_array($gameType, GameTypeList::getAll())) return;
+        if (GameTypeList::isExist($gameType)) return;
 
         //ボスバーの更新
         foreach (GameChef::getPlayerDataList($gameId) as $playerData) {
             $player = Server::getInstance()->getPlayer($playerData->getName());
             $bossbarType = BossbarTypeList::fromGameType($gameType);
             $bossbar = Bossbar::findByType($player, $bossbarType);
-            
+
             //ボスバーの無い試合 or バグ
             //ほぼ１００％前者なので処理を終わらせる
             if ($bossbar === null) return;

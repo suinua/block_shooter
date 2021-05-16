@@ -130,8 +130,6 @@ class SoloGameListener implements Listener
         $player = $event->getPlayer();
         if (!GameChef::isRelatedWith($player, GameTypeList::Solo())) return;
 
-        $playerData = GameChef::findPlayerData($player->getName());
-        $game = GameChef::findGameById($playerData->getBelongGameId());
         CommonGameService::initPlayerStatus($player);
     }
 

@@ -7,8 +7,7 @@ use block_shooter\block\Nexus;
 use block_shooter\GameTypeList;
 use block_shooter\scoreboard\CorePVPScoreboard;
 use block_shooter\service\CommonGameService;
-use block_shooter\service\SoloGameService;
-use core_pvp\service\CorePVPGameService;
+use block_shooter\service\CorePVPGameService;
 use game_chef\api\GameChef;
 use game_chef\models\GameStatus;
 use game_chef\models\Score;
@@ -22,6 +21,7 @@ use pocketmine\entity\Entity;
 use pocketmine\event\block\BlockBreakEvent;
 use pocketmine\event\Listener;
 use pocketmine\event\player\PlayerDeathEvent;
+use pocketmine\event\player\PlayerRespawnEvent;
 use pocketmine\scheduler\ClosureTask;
 use pocketmine\scheduler\TaskScheduler;
 use pocketmine\Server;
@@ -47,6 +47,10 @@ class CorePVPGameListener implements Listener
             $player = Server::getInstance()->getPlayer($playerData->getName());
             CorePVPGameService::sendToGame($player, $game);
         }
+
+        $this->scheduler->scheduleDelayedTask(new ClosureTask(function (int $currentTick) use ($gameId): void {
+            CorePVPGameService::setPrivateNameTag($gameId);
+        }), 20);
     }
 
     public function onFinishedGame(FinishedGameEvent $event) {
@@ -119,9 +123,10 @@ class CorePVPGameListener implements Listener
         $player->sendMessage($team->getTeamColorFormat() . $team->getName() . TextFormat::RESET . "に参加しました");
 
         //途中参加
-        $game = GameChef::findFFAGameById($gameId);
+        $game = GameChef::findTeamGameById($gameId);
         if ($game->getStatus()->equals(GameStatus::Started())) {
-            SoloGameService::sendToGame($player, $game);
+            CorePVPGameService::sendToGame($player, $game);
+            CorePVPGameService::setPrivateNameTag($gameId);
         }
     }
 
@@ -171,13 +176,22 @@ class CorePVPGameListener implements Listener
         $playerData = GameChef::findPlayerData($player->getName());
         $game = GameChef::findGameById($playerData->getBelongGameId());
         $team = $game->getTeamById($playerData->getBelongTeamId());
-        if ($team->getScore()->getValue() !== Nexus::MAX_HEALTH) {
+        if ($team->getScore()->getValue() === Nexus::MAX_HEALTH) {
             GameChef::quitGame($player);
         } else {
             //スポーン地点を再設定
             GameChef::setTeamGamePlayerSpawnPoint($event->getPlayer());
         }
+    }
 
+    public function onPlayerReSpawn(PlayerRespawnEvent $event) {
+        $player = $event->getPlayer();
+        var_dump("respawn");
+        if (!GameChef::isRelatedWith($player, GameTypeList::CorePVP())) return;
+
+        CommonGameService::initPlayerStatus($player);
+        $playerData = GameChef::findPlayerData($player->getName());
+        CorePVPGameService::setPrivateNameTag($playerData->getBelongGameId());
     }
 
     public function onBreakNexus(BlockBreakEvent $event) {

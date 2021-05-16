@@ -5,9 +5,12 @@ namespace block_shooter\entity;
 use block_shooter\block\Nexus;
 use block_shooter\block\UnbreakableBlock;
 use block_shooter\service\BulletService;
+use pocketmine\block\Air;
 use pocketmine\block\Block;
 use pocketmine\entity\Entity;
 use pocketmine\entity\object\ItemEntity;
+use pocketmine\event\block\BlockBreakEvent;
+use pocketmine\level\particle\DestroyBlockParticle;
 use pocketmine\math\RayTraceResult;
 use pocketmine\math\Vector3;
 use pocketmine\math\VoxelRayTrace;
@@ -170,10 +173,15 @@ class BulletEntity extends ItemEntity
         $owner = $this->getOwningEntity();
         if ($owner instanceof Player) {
             if ($block->getId() !== UnbreakableBlock::ID) {
+                $level = $block->getLevel();
                 $item = $owner->getInventory()->getItemInHand();
-                $block->getLevel()->useBreakOn($block, $item, $owner, true);
+                //todo なにかドロップするようにする？
+                (new BlockBreakEvent($owner, $block, $item, $owner->isCreative(), [], 0))->call();
+                $level->setBlock($block->asVector3(), new Air());
+                $level->addParticle(new DestroyBlockParticle($block->asVector3()->add(0.5, 0.5, 0.5), $block));
             }
         }
+
         BulletService::hit($this);
         $this->flagForDespawn();
     }

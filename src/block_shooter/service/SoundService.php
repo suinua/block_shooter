@@ -4,7 +4,6 @@
 namespace mine_deep_rock\pmmp\service;
 
 
-use pocketmine\level\Level;
 use pocketmine\math\Vector3;
 use pocketmine\network\mcpe\protocol\PlaySoundPacket;
 use pocketmine\Player;
@@ -21,5 +20,4 @@ class SoundService
         $packet->soundName = $name;
         $player->sendDataPacket($packet);
     }
-
 }

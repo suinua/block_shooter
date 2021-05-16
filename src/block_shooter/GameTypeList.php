@@ -6,12 +6,16 @@ use game_chef\models\GameType;
 
 class GameTypeList
 {
-    public static function getAll(): array
+    private static function getAllTypes(): array
     {
         return [
-            self::Solo(),
-            self::CorePVP()
+            strval(self::Solo()),
+            strval(self::CorePVP())
         ];
+    }
+
+    public static function isExist(GameType $gameType):bool {
+        return in_array(strval($gameType), self::getAllTypes());
     }
 
     public static function Solo(): GameType

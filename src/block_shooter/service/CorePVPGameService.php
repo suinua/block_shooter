@@ -1,18 +1,19 @@
 <?php
 
-namespace core_pvp\service;
+namespace block_shooter\service;
 
 use block_shooter\block\Nexus;
 use block_shooter\BossbarTypeList;
 use block_shooter\GameTypeList;
 use block_shooter\scoreboard\CorePVPScoreboard;
-use block_shooter\service\CommonGameService;
 use game_chef\api\GameChef;
 use game_chef\api\TeamGameBuilder;
+use game_chef\models\GameId;
 use game_chef\models\Score;
 use game_chef\models\Team;
 use game_chef\models\TeamGame;
 use game_chef\pmmp\bossbar\Bossbar;
+use game_chef\pmmp\private_name_tag\PrivateNameTag;
 use mine_deep_rock\pmmp\service\SoundService;
 use pocketmine\block\Bedrock;
 use pocketmine\level\particle\ExplodeParticle;
@@ -64,7 +65,6 @@ class CorePVPGameService
     }
 
     public static function sendToGame(Player $player, TeamGame $game): void {
-        //todo private name tag
 
         $levelName = $game->getMap()->getLevelName();
         $level = Server::getInstance()->getLevelByName($levelName);
@@ -86,6 +86,13 @@ class CorePVPGameService
         $player->sendMessage("あなたは" . $team->getTeamColorFormat() . $team->getName() . TextFormat::RESET . "です");
     }
 
+    public static function setPrivateNameTag(GameId $gameId) {
+        $closure = function (Team $team, Player $player): string {
+            return $team->getTeamColorFormat() . "[" . $team->getName() . "]" . $player->getName();
+        };
+        PrivateNameTag::setTeamNameTag($gameId, $closure);
+    }
+
     //参加できる試合を探し、参加するように
     public static function randomJoin(Player $player): void {
         $games = GameChef::getGamesByType(GameTypeList::CorePVP());
@@ -96,7 +103,8 @@ class CorePVPGameService
         //todo gamechefに前回のゲームIDとチームIDを記録し、それを使い再度参加する場合はそのチームにするように(負けたチームの場合その試合には参加できない)
         $games = GameChef::getGamesByType(GameTypeList::CorePVP());
         $game = $games[0];
-        $result = GameChef::joinTeamGame($player, $game->getId());
+        $team = $game->getTeams()[0];
+        $result = GameChef::joinTeamGame($player, $game->getId(), $team->getId(), true);
         if (!$result) {
             $player->sendMessage("試合に参加できませんでした");
             return;
@@ -109,7 +117,7 @@ class CorePVPGameService
     }
 
     static function breakNexus(TeamGame $teamGame, Team $targetTeam, Player $attacker, Vector3 $nexusPosition): void {
-        $attackerData = GameChef::findPlayerData($attacker);
+        $attackerData = GameChef::findPlayerData($attacker->getName());
         $attackerTeam = $teamGame->getTeamById($attackerData->getBelongTeamId());
 
         //メッセージと音
@@ -128,7 +136,7 @@ class CorePVPGameService
 
             //TIP
             if ($playerData->getBelongTeamId()->equals($targetTeam->getId())) {
-                $player->sendTip($attacker->getName() . "にコアを攻撃されています\nHP:" . Nexus::MAX_HEALTH - $targetTeam->getScore());
+                $player->sendTip($attacker->getName() . "にコアを攻撃されています\nHP:" . (Nexus::MAX_HEALTH - $targetTeam->getScore()->getValue()));
             } else {
                 $player->sendTip(
                     $attackerTeam->getTeamColorFormat() . $attacker->getName() . TextFormat::RESET . "が" . $targetTeam->getTeamColorFormat() . $targetTeam->getName() . TextFormat::RESET . "を攻撃中"

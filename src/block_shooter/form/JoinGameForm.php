@@ -4,8 +4,8 @@
 namespace block_shooter\form;
 
 
+use block_shooter\service\CorePVPGameService;
 use block_shooter\service\SoloGameService;
-use core_pvp\service\CorePVPGameService;
 use form_builder\models\simple_form_elements\SimpleFormButton;
 use form_builder\models\simple_form_elements\SimpleFormImage;
 use form_builder\models\simple_form_elements\SimpleFormImageType;
